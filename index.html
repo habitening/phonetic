@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phonetic</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+  </style>
+</head>
+
+<body>
+
+<main>
+<h1>Phonetic</h1>
+
+<form id="nameForm" name="nameForm">
+<p><input type="text" id="name" name="name" autofocus required maxlength="20" minlength="1" pattern="[A-Za-z]+" placeholder="name" spellcheck="false">
+<button type="submit">Spell</button></p>
+
+<p>The name would be spelled as:</p>
+
+<output id="spell"></output>
+</form>
+
+</main>
+
+<script>
+/*
+ * Words in the NATO phonetic code.
+ */
+const NATO = ['ALPHA',
+              'BRAVO',
+              'CHARLIE',
+              'DELTA',
+              'ECHO',
+              'FOXTROT',
+              'GOLF',
+              'HOTEL',
+              'INDIA',
+              'JULIETT',
+              'KILO',
+              'LIMA',
+              'MIKE',
+              'NOVEMBER',
+              'OSCAR',
+              'PAPA',
+              'QUEBEC',
+              'ROMEO',
+              'SIERRA',
+              'TANGO',
+              'UNIFORM',
+              'VICTOR',
+              'WHISKEY',
+              'XRAY',
+              'YANKEE',
+              'ZULU'];
+
+/*
+ * Spell name using the words in words.
+ */
+function spell(name, words = NATO) {
+  if (typeof name !== 'string') {
+    throw new TypeError('name must be a non-empty string of letters.');
+  }
+  if (name.length <= 0) {
+    throw new RangeError('name must be a non-empty string of letters.');
+  }
+  name = name.trim().toLowerCase();
+  let letter_map = new Map(words.map(w => [w[0].toLowerCase(), w])),
+      result = [];
+  for (let letter of name) {
+    if (letter_map.has(letter)) {
+      result.push(letter_map.get(letter));
+    }
+    else {
+      throw new RangeError('name must be a non-empty string of letters.');
+    }
+  }
+  return result;
+}
+
+/*
+ * Unit tests
+ */
+
+function test_NATO() {
+  console.assert(NATO.length === 26,
+                 {msg: 'NATO is incorrect.'});
+  for (let word of NATO) {
+    console.assert(word === word.trim(),
+                   {msg: 'NATO is incorrect.'});
+    console.assert(word === word.toUpperCase(),
+                   {msg: 'NATO is incorrect.'});
+    console.assert(word.length > 0,
+                   {msg: 'NATO is incorrect.'});
+  }
+}
+
+function test_spell() {
+  for (let [value, expected] of [
+    ['Ashcraft', ['ALPHA', 'SIERRA', 'HOTEL', 'CHARLIE', 'ROMEO', 'ALPHA', 'FOXTROT', 'TANGO']],
+    ['Ashcroft', ['ALPHA', 'SIERRA', 'HOTEL', 'CHARLIE', 'ROMEO', 'OSCAR', 'FOXTROT', 'TANGO']],
+    ['Deusen', ['DELTA', 'ECHO', 'UNIFORM', 'SIERRA', 'ECHO', 'NOVEMBER']],
+    ['Gutierrez', ['GOLF', 'UNIFORM', 'TANGO', 'INDIA', 'ECHO', 'ROMEO', 'ROMEO', 'ECHO', 'ZULU']],
+    ['Honeyman', ['HOTEL', 'OSCAR', 'NOVEMBER', 'ECHO', 'YANKEE', 'MIKE', 'ALPHA', 'NOVEMBER']],
+    ['Jackson', ['JULIETT', 'ALPHA', 'CHARLIE', 'KILO', 'SIERRA', 'OSCAR', 'NOVEMBER']],
+    ['Lee', ['LIMA', 'ECHO', 'ECHO']],
+    ['Pfister', ['PAPA', 'FOXTROT', 'INDIA', 'SIERRA', 'TANGO', 'ECHO', 'ROMEO']],
+    ['Rubin', ['ROMEO', 'UNIFORM', 'BRAVO', 'INDIA', 'NOVEMBER']],
+    ['Robert', ['ROMEO', 'OSCAR', 'BRAVO', 'ECHO', 'ROMEO', 'TANGO']],
+    ['Rupert', ['ROMEO', 'UNIFORM', 'PAPA', 'ECHO', 'ROMEO', 'TANGO']],
+    ['Tymczak', ['TANGO', 'YANKEE', 'MIKE', 'CHARLIE', 'ZULU', 'ALPHA', 'KILO']],
+    ['VanDeusen', ['VICTOR', 'ALPHA', 'NOVEMBER', 'DELTA', 'ECHO', 'UNIFORM', 'SIERRA', 'ECHO', 'NOVEMBER']],
+    ['Washington', ['WHISKEY', 'ALPHA', 'SIERRA', 'HOTEL', 'INDIA', 'NOVEMBER', 'GOLF', 'TANGO', 'OSCAR', 'NOVEMBER']]]) {
+    console.assert(spell(value).join('') === expected.join(''),
+                   {msg: 'spell() failed.'});
+  }
+}
+
+test_NATO();
+test_spell();
+
+const form = document.querySelector('#nameForm');
+form.addEventListener('submit', (event) => {
+  let output = document.querySelector('#spell'),
+      words = spell(form.name.value),
+      oldList = output.querySelector('ul'),
+      newList = document.createElement('ul');
+
+  for (let word of words) {
+    let element = document.createElement('li');
+    element.appendChild(document.createTextNode(`${ word.charAt(0) } as in ${ word }.`));
+    newList.appendChild(element);
+  }
+  if (oldList == null) {
+    output.appendChild(newList);
+  }
+  else {
+    output.replaceChild(newList, oldList);
+  }
+
+  event.preventDefault();
+});
+</script>
+</body>
+
+</html>
